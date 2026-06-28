@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "radshield"
+version = "0.0.1"
+description = "Fault-tolerant inference runtime for compute in harsh environments. ECC for your model."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+keywords = ["radiation", "fault-tolerance", "inference", "SEU", "orbital", "edge-ai", "reliability"]
+dependencies = ["numpy>=1.23"]
+
+[project.optional-dependencies]
+experiments = ["matplotlib>=3.5"]
+
+[tool.setuptools.packages.find]
+include = ["radshield*"]
