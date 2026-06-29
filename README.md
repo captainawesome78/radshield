@@ -50,6 +50,29 @@ corrupted = rs.inject.inject_bit_flips(params["W1"], n_flips=5, region="exponent
 That's the whole v0 surface. Three primitives, near-zero overhead:
 a checksum is a few MB/ms; sanitizing is one elementwise clip.
 
+## Use it on a real PyTorch model
+
+One call protects an `nn.Module`: it checksums the weights and calibrates output
+ranges on a clean batch, then auto-repairs and sanitizes on every forward.
+
+```python
+import radshield.torch as rst
+
+handle = rst.protect(model, clean_batch=x)   # checksum weights + calibrate
+
+# ... model runs in orbit; bit flips strike its parameters ...
+y = model(x)                                  # weights auto-repaired, output sane
+print(handle.guard.repairs, "upsets repaired")
+```
+
+Validated on a real CNN: as upsets accumulate in the model's parameters, an
+unprotected model fails catastrophically up to ~91% of the time; the protected
+model holds at 0%.
+
+![torch results](experiments/results_torch.png)
+
+*Reproduce with `python experiments/torch_campaign.py`.*
+
 ## How it works
 
 A float32 is `[sign | 8 exponent bits | 23 mantissa bits]`. Flips in the high
@@ -71,8 +94,8 @@ most of the reliability at a fraction of the cost.
 v0 (this repo) is the numpy reference implementation and the measurement harness.
 Open-core direction:
 
-- **Framework adapters** — PyTorch / JAX hooks so `WeightGuard` wraps an
-  `nn.Module` and sanitization attaches to layers automatically.
+- **Framework adapters** — PyTorch hooks so `protect()` wraps an `nn.Module`
+  with one call (**done**, see `radshield.torch`); JAX next.
 - **Selective protection** — spend the checksum/redundancy budget only on the
   most sensitive layers and the most sensitive bits, guided by a profiler.
 - **Quantization-aware guards** — int8/fp8 fault models for the chips that

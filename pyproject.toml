@@ -13,7 +13,8 @@ keywords = ["radiation", "fault-tolerance", "inference", "SEU", "orbital", "edge
 dependencies = ["numpy>=1.23"]
 
 [project.optional-dependencies]
-experiments = ["matplotlib>=3.5"]
+torch = ["torch>=2.0"]
+experiments = ["matplotlib>=3.5", "torch>=2.0"]
 
 [tool.setuptools.packages.find]
 include = ["radshield*"]
